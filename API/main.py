@@ -17,6 +17,10 @@ collateral_get_args.add_argument("walletAddress", type=str, help="wallet address
 exchange_get_args = reqparse.RequestParser()
 exchange_get_args.add_argument("usd", type=float, help="amount of usd is required", required=True)
 
+QrInformation_get_args = reqparse.RequestParser()
+QrInformation_get_args.add_argument("bankAccountNumber", type=str,help="Merchant Bank Account Number is required", required=True)
+QrInformation_get_args.add_argument("transactionAmount", type=str,help="Transaction Amount is required", required=True)
+
 class Exchange(Resource):
     def post(self):
         args = exchange_get_args.parse_args()
@@ -56,10 +60,17 @@ class Collateral(Resource):
         return response, 201
 
 
+class QrInformation(Resource):
+    def get(self):
+        args = QrInformation_get_args.parse_args()
+        print(request.form)
+
+
 
 
 api.add_resource(Collateral, "/collateral/<string:walletAddress>")
 api.add_resource(Exchange, "/exchange")
+api.add_resource(QrInformation,"/transact")
 
 if __name__ == "__main__":
     app.run(debug=True)
