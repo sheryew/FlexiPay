@@ -7,6 +7,7 @@ import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
 import axios from "axios";
 
 
+
 function SignIn() {
   const { connectAsync } = useConnect();
   const { disconnectAsync } = useDisconnect();
@@ -54,27 +55,22 @@ function SignIn() {
 
     console.log(userData['address'])
 
-    const spawner = require('child_process').spawn;
-    const py_payload = userData['address'];
-    const python_process = spawner('python', ["../src/qrScanner.py", py_payload])
-    python_process.stdout.on('data', (data) => {
-      console.log('Data received from python script ', data.toString())
-    })
 
   };
 
   return (
     <div>
       <h3>Web3 Authentication</h3>
-      <button onClick={() => handleAuth("meta")}>
+      <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+      <button class="button-34" onClick={() => handleAuth("meta")}>
         Authenticate via Metamask
       </button>
       <br />
-      <button onClick={() => handleAuth("coin")}>
+      <button class="button-35" onClick={() => handleAuth("coin")}>
         Authenticate via Coinbase
       </button>
       <br/>
-      <button onClick={() => handleAuth("wal")}>
+      <button class="button-36" onClick={() => handleAuth("wal")}>
         Authenticate via Wallet Connect
       </button>
     </div>

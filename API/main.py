@@ -28,8 +28,7 @@ class Exchange(Resource):
         response = requests.get(url).json()
         rate = response['rates']['ETH']
         return {'ETH': args['usd'] / rate}, 201
-
-
+    
 
 class Collateral(Resource):
 
