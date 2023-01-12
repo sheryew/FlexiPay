@@ -1,7 +1,7 @@
 from flask import Flask, request
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
 import requests
-
+import qrcode
 
 app = Flask(__name__)
 api = Api(app)
@@ -20,6 +20,22 @@ exchange_get_args.add_argument("usd", type=float, help="amount of usd is require
 QrInformation_get_args = reqparse.RequestParser()
 QrInformation_get_args.add_argument("bankAccountNumber", type=str,help="Merchant Bank Account Number is required", required=True)
 QrInformation_get_args.add_argument("transactionAmount", type=str,help="Transaction Amount is required", required=True)
+
+Loan_get_args = reqparse.RequestParser()
+Loan_get_args.add_argument("transactionAmount", type=float,help="Transaction Amount is required", required=True)
+Loan_get_args.add_argument("merchantAccount", type=str,help="merchantAccount is required", required=True)
+
+Loan_put_args = reqparse.RequestParser()
+Loan_put_args.add_argument("transactionAmount", type=float,help="Transaction Amount is required", required=True)
+Loan_put_args.add_argument("merchantAccount", type=str,help="Merchant Account is required", required=True)
+
+PANDA_BANK_ACCOUNT_NUMBER= "888-8888-88"
+
+accounts = {"652-3342-22": {"Account Holder": "IKEA", "Balance": 2002.87}, 
+            "923-1234-66":{"Account Holder": "Singapore General Hospital", "Balance": 6008.73},
+            "123-4567-89":{"Account Holder": "Courts", "Balance": 78920.43},
+            PANDA_BANK_ACCOUNT_NUMBER: {"Account Holder": "Panda Bank", "Balance": 9999999}
+            }
 
 class Exchange(Resource):
     def post(self):
@@ -58,18 +74,86 @@ class Collateral(Resource):
         response = response.json()
         return response, 201
 
+def approveLoan(transactionAmount, merchantAccount):
+    if merchantAccount not in accounts:
+        raise ValueError("Invalid Merchant Account Number")
+    return transactionAmount <= accounts[PANDA_BANK_ACCOUNT_NUMBER]["Balance"]
 
-class QrInformation(Resource):
+def loanTransfer(transactionAmount, merchantAccount):
+    if merchantAccount not in accounts:
+        raise ValueError("Invalid Merchant Account Number")
+    accounts[PANDA_BANK_ACCOUNT_NUMBER]["Balance"] -= transactionAmount
+    accounts[merchantAccount]["Balance"] += transactionAmount
+
+
+
+class Loan(Resource):
+    def get(self):
+        args = Loan_get_args.parse_args()
+        transactionAmount = args['transactionAmount']
+        merchantAccount = args['merchantAccount']
+        try:
+            loanApproved = approveLoan(transactionAmount, merchantAccount)
+            response = {"Approved": loanApproved}
+            if loanApproved:
+                return response,201
+            return response, 422
+        except:
+            return {"Message": "Invalid Account Number"},404
+
+    def put(self):
+        args = Loan_put_args.parse_args()
+        transactionAmount = args['transactionAmount']
+        merchantAccount = args['merchantAccount']
+        try:
+            if not approveLoan(transactionAmount, merchantAccount):
+                return {"Message": "Loan was not approved"},422
+            loanTransfer(transactionAmount,merchantAccount)
+            return {"Message": "Loan Amount has been transferred"}, 201
+        except:
+            return {"Message": "Invalid Account Number"},404
+
+
+class Account(Resource):
+    def get(self,accountNumber):
+        if accountNumber not in accounts:
+            return {"Message":"Invalid Account Number"},404
+        return {"accountNumber": accountNumber} | accounts[accountNumber], 201
+
+
+
+def generateMerchantQR(merchantAccountNumber, transactionAmount, merchantName):
+    if merchantAccountNumber not in accounts:
+        raise ValueError("Invalid Merchant Account Number")
+
+    inputData = merchantAccountNumber + " " + transactionAmount
+    qr = qrcode.QRCode(
+        version=1,
+        box_size=10,
+        border=5)
+    qr.add_data(inputData)
+    qr.make(fit=True)
+    img = qr.make_image(fill='black', back_color='white')
+    merchantQR = merchantName + "QR.png"
+    img.save(merchantQR)
+
+
+class QR(Resource):
     def get(self):
         args = QrInformation_get_args.parse_args()
         print(request.form)
+
+    def put(self):
+        pass
 
 
 
 
 api.add_resource(Collateral, "/collateral/<string:walletAddress>")
 api.add_resource(Exchange, "/exchange")
-api.add_resource(QrInformation,"/transact")
+api.add_resource(Loan, "/loan")
+api.add_resource(Account, "/account/<string:accountNumber>")
+#api.add_resource(QrInformation,"/transact")
 
 if __name__ == "__main__":
     app.run(debug=True)
