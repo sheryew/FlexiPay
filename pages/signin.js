@@ -4,7 +4,10 @@ import { useRouter } from "next/router";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
+import { NextResponse, NextRequest } from 'next/server'
+import { useEffect } from "react";
 import axios from "axios";
+import Router from "next/router";
 
 
 
@@ -50,11 +53,19 @@ function SignIn() {
 
     console.log("Sending Connected Account and Chain ID to Moralis Auth API");
     console.log(userData)
+    const userWallet = userData['address']
     
+    function sendProps() {
+      Router.push({
+        pathname: "/",
+        query: {
+          userWallet: userWallet
+        }
+      })
+    }
 
-
-    console.log(userData['address'])
-
+    sendProps();
+    push('/')
 
   };
 

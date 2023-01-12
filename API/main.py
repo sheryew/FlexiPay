@@ -1,10 +1,14 @@
 from flask import Flask, request
+import flask.scaffold
+flask.helpers._endpoint_from_view_func = flask.scaffold._endpoint_from_view_func
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
 import requests
+from flask_cors import CORS
 
 
 app = Flask(__name__)
 api = Api(app)
+CORS(app)
 
 
 collateral_post_args = reqparse.RequestParser()
