@@ -1,7 +1,6 @@
 import { Table, Row, Col, Tooltip, User, Text } from "@nextui-org/react";
 import { StyledBadge } from "./StyledBadge";
 import { IconButton } from "./IconButton";
-import { EyeIcon } from "./EyeIcon";
 import { EditIcon } from "./EditIcon";
 
 export default function App() {
@@ -96,7 +95,6 @@ export default function App() {
             <Col css={{ d: "flex" }}>
               <Tooltip content="Details">
                 <IconButton onClick={() => console.log("View user", user.id)}>
-                  <EyeIcon size={20} fill="#979797" />
                 </IconButton>
               </Tooltip>
             </Col>
@@ -124,33 +122,18 @@ export default function App() {
     }
   };
   return (
-    <Table
-      aria-label="Example table with custom cells"
-      css={{
-        height: "auto",
-        minWidth: "100%",
-      }}
-      selectionMode="none"
-    >
-      <Table.Header columns={columns}>
-        {(column) => (
-          <Table.Column
-            key={column.uid}
-            hideHeader={column.uid === "actions"}
-            align={column.uid === "actions" ? "center" : "start"}
-          >
-            {column.name}
-          </Table.Column>
-        )}
+    <Table>
+      <Table.Header>
+        <Table.Column>NAME</Table.Column>
+        <Table.Column>ROLE</Table.Column>
+        <Table.Column>STATUS</Table.Column>
       </Table.Header>
-      <Table.Body items={users}>
-        {(item) => (
-          <Table.Row>
-            {(columnKey) => (
-              <Table.Cell>{renderCell(item, columnKey)}</Table.Cell>
-            )}
-          </Table.Row>
-        )}
+      <Table.Body>
+        <Table.Row key="1">
+          <Table.Cell>Tony Reichert</Table.Cell>
+          <Table.Cell>CEO</Table.Cell>
+          <Table.Cell>Active</Table.Cell>
+        </Table.Row>
       </Table.Body>
     </Table>
   );

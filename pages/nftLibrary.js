@@ -2,6 +2,7 @@ import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 import { useRouter } from "next/router"
+import Router from "next/router";
 import { useEffect, useState, React } from 'react'
 import {ethers} from "ethers"
 import { Navbar, Button, Link, Text, Card, Spacer, Radio, useTheme, Col, Row, Grid, Container} from '@nextui-org/react';
@@ -283,7 +284,7 @@ export default function Home() {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({"transactionAmount": loanFund, "merchantAccount": "652-3342-22"})
+      body: JSON.stringify({"transactionAmount": loanFund, "merchantAccount": merchantAccount})
     })
     const response2 = await fetch("http://127.0.0.1:5000/collateral/123" , {
         method: 'POST',
@@ -321,7 +322,7 @@ export default function Home() {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({"walletAddress": String(info.owner), "loanID": String(parseInt(info.id['_hex'], 16)), "balance": String(parseInt(info.loanAmount['_hex'], 16)), "loanExpiry": parseInt(info.loanCompleteTime['_hex'], 16)})
+            body: JSON.stringify({"walletAddress": String(info.owner), "loanID": String(parseInt(info.id['_hex'], 16)), "balance": String((parseInt(info.loanAmount['_hex'], 16) * 1.05)/ 10), "loanExpiry": parseInt(info.loanCompleteTime['_hex'], 16)})
         })})
         Contract.on("LoanCreated", () => {
             fetch("http://127.0.0.1:5000/loan", {
@@ -330,7 +331,7 @@ export default function Home() {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({"transactionAmount": Amount, "merchantAccount": "652-3342-22"})
+            body: JSON.stringify({"transactionAmount": loanFund, "merchantAccount": merchantAccount})
       })})
     } else {
         console.log("Something went wrong!")
@@ -338,11 +339,18 @@ export default function Home() {
   }
   const router = useRouter()
   const {
-    query: {userWallet, loanFund}, 
+    query: {userWallet, loanFund, merchantAccount}, 
   } = router 
 
-  
-  
+  function sendProps() {
+    Router.push({
+      pathname: "/",
+      query: {
+        userWallet: props.userWallet,
+        loanFund: 1000
+      }
+    })
+  }
 
   const props = {userWallet, loanFund} 
   console.log(props.userWallet)
@@ -389,7 +397,9 @@ export default function Home() {
             </Text>
         </Navbar.Brand>
         <Navbar.Content>
-          <Navbar.Link href="/">Home</Navbar.Link>
+          <Navbar.Link onClick={()=>{
+                      sendProps()
+                    }}>Home</Navbar.Link>
         </Navbar.Content>
         <Navbar.Content>
           <Navbar.Link color="inherit" href="/signin">
