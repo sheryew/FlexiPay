@@ -45,10 +45,10 @@ Loan_put_args.add_argument("merchantAccount", type=str,help="Merchant Account is
 
 PANDA_BANK_ACCOUNT_NUMBER= "888-8888-88"
 
-accounts = {"652-3342-22": {"Account Holder": "IKEA", "Balance": 2002.87},
-            "923-1234-66":{"Account Holder": "Singapore General Hospital", "Balance": 6008.73},
-            "123-4567-89":{"Account Holder": "Courts", "Balance": 78920.43},
-            PANDA_BANK_ACCOUNT_NUMBER: {"Account Holder": "Panda Bank", "Balance": 9999999}
+accounts = {"652-3342-22": {"Account Holder": "IKEA", "Balance": 2002.87, "TransactionHistory":[]},
+            "923-1234-66":{"Account Holder": "Singapore General Hospital", "Balance": 6008.73, "TransactionHistory":[]},
+            "123-4567-89":{"Account Holder": "Courts", "Balance": 78920.43, "TransactionHistory":[]},
+            PANDA_BANK_ACCOUNT_NUMBER: {"Account Holder": "Panda Bank", "Balance": 9999999, "TransactionHistory":[]}
             }
 
 approvedCollections = {"doodle": "0x8a90CAb2b38dba80c64b7734e58Ee1dB38B8992e"}
@@ -125,12 +125,17 @@ def approveLoan(transactionAmount, merchantAccount):
         raise ValueError("Invalid Merchant Account Number")
     return transactionAmount <= accounts[PANDA_BANK_ACCOUNT_NUMBER]["Balance"]
 
+def createTransaction(transactionAmount, sender, receiver):
+    date = time.time()
+    accounts[receiver]["TransactionHistory"].insert(0,{"Sender": sender, "Transaction Amount(SGD)": transactionAmount, "Date": date, "recipient": receiver})
+    accounts[sender]["TransactionHistory"].insert(0,{"Sender": sender, "Transaction Amount(SGD)": (-transactionAmount), "Date": date, "recipient": receiver})
+
 def loanTransfer(transactionAmount, merchantAccount):
     if merchantAccount not in accounts:
         raise ValueError("Invalid Merchant Account Number")
     accounts[PANDA_BANK_ACCOUNT_NUMBER]["Balance"] -= transactionAmount
     accounts[merchantAccount]["Balance"] += transactionAmount
-
+    createTransaction(transactionAmount,PANDA_BANK_ACCOUNT_NUMBER, merchantAccount)
 
 
 class Loan(Resource):
@@ -181,8 +186,10 @@ def modifyLoanRecord(loanID, remainingBalance):
 def updateLoanRecords():
     for wallet, loanRecords in loans.items():   
         for i in range(len(loanRecords) -1, -1, -1):
-            if float(loanRecords[i]['balance']) <= 0 or loanRecords[i]["loanExpiry"] <= time.time_ns():
+            if float(loanRecords[i]['balance']) <= 0 or loanRecords[i]["loanExpiry"] <= round(time.time()):
+                print(loanRecords[i]['balance'], loanRecords[i]["loanExpiry"], round(time.time()))
                 del loanRecords[i]
+            
 
 
 
@@ -190,6 +197,7 @@ class LoanInfo(Resource):
     def post(self):
         result = {}
         print("correct")
+        print(loans)
         args = LoanInfo_post_args.parse_args()
         walletAddress = args["walletAddress"]
         if walletAddress not in loans.keys():
