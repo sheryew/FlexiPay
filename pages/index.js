@@ -4,13 +4,14 @@ import styles from '../styles/Home.module.css'
 import { useRouter } from "next/router"
 import { useEffect, useState, React } from 'react'
 import {ethers} from "ethers"
-import { Navbar, Button, Link, Text, Card, Spacer, Radio, useTheme, Col, Row, Grid, Container, Avatar, createTheme} from '@nextui-org/react';
+import { Navbar, Button, Link, Text, Card, Spacer, Radio, useTheme, Col, Row, Grid, Container, Avatar, createTheme, Tooltip, Input, useInput} from '@nextui-org/react';
 import { Table } from '@nextui-org/react';
 import { AcmeLogo } from '../components/AcmeLogo'
 import { StyledBadge } from "./StyledBadge";
 import { IconButton } from "./IconButton";
-import { EyeIcon } from "./EyeIcon";
 import { EditIcon } from "./EditIcon";
+import { SendButton } from "./SendButton";
+import { SendIcon } from "./SendIcon";
 import Router from "next/router";
 export default function Home() {
 
@@ -349,6 +350,26 @@ export default function Home() {
     }
   }
 
+  async function repayLoan() {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send('eth_requestAccounts', []);
+    const signer = provider.getSigner();
+
+    const Contract = new ethers.Contract(ContractAddress, numberContractABI, signer);
+    await Contract.repayLoan(2, {value: ethers.utils.parseEther('0.1')})
+    Contract.on("LoanCreated", (id, remainingBalance) => {
+      let info = {
+        id: id,
+        remainingBalance: remainingBalance
+      };
+      return JSON.stringify(info, null, 2);
+    })
+  }
+
+  function getvalue() {
+    console.log(event.target.value);
+  }
+
   const router = useRouter()
   const {
     query: {userWallet}, 
@@ -362,21 +383,29 @@ export default function Home() {
   const axios = require('axios');
   const [data, setData] = useState('');
   const callAPI = async () => {
-    const data = await fetch('http://127.0.0.1:5000/collateral/' + props.userWallet).then(res => res.json())
+    const data = await fetch('http://127.0.0.1:5000/loanInfo', {
+      method: 'POST',
+      headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({"walletAddress": props.userWallet})
+    }).then(res => res.json())
     setData(data);
   }
 
   useEffect(() =>{
     callAPI()
   }, [])
-  console.log(data['nfts'])
+  console.log(data)
   var date = new Date()
   date.setDate(date.getDate() + 30)
   function sendProps() {
     Router.push({
       pathname: "/nftLibrary",
       query: {
-        userWallet: props.userWallet
+        userWallet: props.userWallet,
+        loanFund: 1000
       }
     })
   }
@@ -399,6 +428,7 @@ export default function Home() {
   ];
 
   const colors = ["primary", "secondary", "success", "warning", "error"];
+  const { value, reset, bindings } = useInput("");
   
   return (
     <div>
@@ -458,11 +488,35 @@ export default function Home() {
         <Table.Column>Action</Table.Column>
       </Table.Header>
       <Table.Body>
-        <Table.Row key="1">
-          <Table.Cell>Loan ID test</Table.Cell>
-          <Table.Cell>Test Amount</Table.Cell>
-          <Table.Cell><Button size="xs">Pay</Button></Table.Cell>
-        </Table.Row>
+      {data["loans"]?.map(user => (
+                <Table.Row key="1">
+                    <Table.Cell>{user.loanID}</Table.Cell>
+                    <Table.Cell>{user.balance}</Table.Cell>
+                    <Table.Cell> 
+                    <Tooltip content={"Enter amount you wish to pay"} rounded color="primary">
+                      <Input 
+                        {...bindings}
+                          width="120px"
+                          clearable
+                          contentRightStyling={false}
+                          placeholder="Type your message..."
+                          status="primary"
+                          contentRight={
+                          <SendButton onClick={()=>{
+                            console.log(value)
+                          }}>
+                          <SendIcon/>
+                          </SendButton>
+                        }
+                      />
+                      </Tooltip>
+                    </Table.Cell>
+                    {/* <Table.Cell><Button size="xs" onClick={()=>{
+                      repayLoan()
+                    }}>Pay</Button></Table.Cell> */}
+                    
+                </Table.Row>
+            ))}
         
       </Table.Body>
     </Table>
@@ -504,7 +558,7 @@ export default function Home() {
         </Col>
         </Row>
   </Container>
-  
+
   
   
   

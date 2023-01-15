@@ -8,289 +8,254 @@ import { Navbar, Button, Link, Text, Card, Spacer, Radio, useTheme, Col, Row, Gr
 import { AcmeLogo } from '../components/AcmeLogo'
 export default function Home() {
 
-  var ContractAddress = "0xE1Fb9d4188cBd85339Ca4260FA36f3db484B433E";
+  var ContractAddress = "0x5a7ff8de83F250037E51C1E21C61133eDb9Fd866";
   var ContractABI = [
     {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
-        },
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "owner",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "tokenAddress",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "tokenId",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "loanAmount",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "loanCompleteTime",
-          "type": "uint256"
-        }
-      ],
-      "name": "LoanCreated",
-      "type": "event"
+     "inputs": [
+      {
+       "internalType": "address",
+       "name": "_tokenAddress",
+       "type": "address"
+      },
+      {
+       "internalType": "uint256",
+       "name": "_tokenid",
+       "type": "uint256"
+      },
+      {
+       "internalType": "uint256",
+       "name": "_loanAmount",
+       "type": "uint256"
+      },
+      {
+       "internalType": "uint256",
+       "name": "_loanCompleteTime",
+       "type": "uint256"
+      },
+      {
+       "internalType": "uint256",
+       "name": "_interestRate",
+       "type": "uint256"
+      }
+     ],
+     "name": "createLoan",
+     "outputs": [
+      {
+       "internalType": "uint256",
+       "name": "",
+       "type": "uint256"
+      }
+     ],
+     "stateMutability": "nonpayable",
+     "type": "function"
     },
     {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
-        }
-      ],
-      "name": "LoanDrawn",
-      "type": "event"
+     "anonymous": false,
+     "inputs": [
+      {
+       "indexed": false,
+       "internalType": "uint256",
+       "name": "id",
+       "type": "uint256"
+      },
+      {
+       "indexed": true,
+       "internalType": "address",
+       "name": "owner",
+       "type": "address"
+      },
+      {
+       "indexed": false,
+       "internalType": "address",
+       "name": "tokenAddress",
+       "type": "address"
+      },
+      {
+       "indexed": false,
+       "internalType": "uint256",
+       "name": "tokenId",
+       "type": "uint256"
+      },
+      {
+       "indexed": false,
+       "internalType": "uint256",
+       "name": "loanAmount",
+       "type": "uint256"
+      },
+      {
+       "indexed": false,
+       "internalType": "uint256",
+       "name": "loanCompleteTime",
+       "type": "uint256"
+      }
+     ],
+     "name": "LoanCreated",
+     "type": "event"
     },
     {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "lender",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "repayer",
-          "type": "address"
-        }
-      ],
-      "name": "LoanRepayed",
-      "type": "event"
+     "anonymous": false,
+     "inputs": [
+      {
+       "indexed": false,
+       "internalType": "uint256",
+       "name": "id",
+       "type": "uint256"
+      }
+     ],
+     "name": "LoanDrawn",
+     "type": "event"
     },
     {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "lender",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "caller",
-          "type": "address"
-        }
-      ],
-      "name": "LoanSeized",
-      "type": "event"
+     "anonymous": false,
+     "inputs": [
+      {
+       "indexed": false,
+       "internalType": "uint256",
+       "name": "id",
+       "type": "uint256"
+      },
+      {
+       "indexed": false,
+       "internalType": "uint256",
+       "name": "remainingBalance",
+       "type": "uint256"
+      }
+     ],
+     "name": "LoanRepayed",
+     "type": "event"
     },
     {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "lender",
-          "type": "address"
-        }
-      ],
-      "name": "LoanUnderwritten",
-      "type": "event"
+     "anonymous": false,
+     "inputs": [
+      {
+       "indexed": false,
+       "internalType": "uint256",
+       "name": "id",
+       "type": "uint256"
+      },
+      {
+       "indexed": false,
+       "internalType": "address",
+       "name": "lender",
+       "type": "address"
+      }
+     ],
+     "name": "LoanUnderwritten",
+     "type": "event"
     },
     {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_tokenAddress",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_tokenid",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_loanAmount",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_loanCompleteTime",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_interestRate",
-          "type": "uint256"
-        }
-      ],
-      "name": "createLoan",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "nonpayable",
-      "type": "function"
+     "inputs": [
+      {
+       "internalType": "uint256",
+       "name": "_loanId",
+       "type": "uint256"
+      }
+     ],
+     "name": "repayLoan",
+     "outputs": [],
+     "stateMutability": "payable",
+     "type": "function"
     },
     {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_loanId",
-          "type": "uint256"
-        }
-      ],
-      "name": "drawLoan",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
+     "inputs": [],
+     "name": "seizeNFT",
+     "outputs": [],
+     "stateMutability": "payable",
+     "type": "function"
     },
     {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "nftLoans",
-      "outputs": [
-        {
-          "internalType": "address",
-"name": "tokenAddress",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "tokenOwner",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "lender",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "tokenId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "loanAmount",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "loanCompleteTime",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "loanAmtWithInterest",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
+     "inputs": [
+      {
+       "internalType": "uint256",
+       "name": "_loanId",
+       "type": "uint256"
+      }
+     ],
+     "name": "underwriteLoan",
+     "outputs": [],
+     "stateMutability": "payable",
+     "type": "function"
     },
     {
-      "inputs": [],
-      "name": "numLoans",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
+     "inputs": [],
+     "name": "get",
+     "outputs": [
+      {
+       "internalType": "uint256",
+       "name": "",
+       "type": "uint256"
+      }
+     ],
+     "stateMutability": "view",
+     "type": "function"
     },
     {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_loanId",
-          "type": "uint256"
-        }
-      ],
-      "name": "repayLoan",
-      "outputs": [],
-      "stateMutability": "payable",
-      "type": "function"
+     "inputs": [
+      {
+       "internalType": "uint256",
+       "name": "",
+       "type": "uint256"
+      }
+     ],
+     "name": "nftLoans",
+     "outputs": [
+      {
+       "internalType": "address",
+       "name": "tokenAddress",
+       "type": "address"
+      },
+      {
+       "internalType": "address",
+       "name": "tokenOwner",
+       "type": "address"
+      },
+      {
+       "internalType": "address",
+       "name": "lender",
+       "type": "address"
+      },
+      {
+       "internalType": "uint256",
+       "name": "tokenId",
+       "type": "uint256"
+      },
+      {
+       "internalType": "uint256",
+       "name": "loanAmount",
+       "type": "uint256"
+      },
+      {
+       "internalType": "uint256",
+       "name": "loanCompleteTime",
+       "type": "uint256"
+      },
+      {
+       "internalType": "uint256",
+       "name": "loanAmtWithInterest",
+       "type": "uint256"
+      }
+     ],
+     "stateMutability": "view",
+     "type": "function"
     },
     {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_loanId",
-          "type": "uint256"
-        }
-      ],
-      "name": "seizeNFT",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_loanId",
-          "type": "uint256"
-        }
-      ],
-      "name": "underwriteLoan",
-      "outputs": [],
-      "stateMutability": "payable",
-      "type": "function"
+     "inputs": [],
+     "name": "numLoans",
+     "outputs": [
+      {
+       "internalType": "uint256",
+       "name": "",
+       "type": "uint256"
+      }
+     ],
+     "stateMutability": "view",
+     "type": "function"
     }
-  ];
+   ]
+   
+   
 
-  async function setSafeApproval(NFTContract, NFTToken, Amount, UnixTimeStamp, InterestRate) {
+  async function setSafeApproval(NFTContract, NFTToken, Amount, UnixTimeStamp, InterestRate, symbol, loanFund) {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     await provider.send('eth_requestAccounts', []);
     const signer = provider.getSigner();
@@ -304,13 +269,13 @@ export default function Home() {
         txReceipt = await provider.getTransactionReceipt(transactionHash);
         console.log('I am waiting!');
       }
-      initialise(NFTContract, NFTToken, Amount, UnixTimeStamp, InterestRate);
+      initialise(NFTContract, NFTToken, Amount, UnixTimeStamp, InterestRate, symbol, loanFund);
     }
 
     await isTransactionMined(transactionHash);
   }
 
-  async function initialise(NFTContract, NFTToken, Amount, UnixTimeStamp, InterestRate) {
+  async function initialise(NFTContract, NFTToken, Amount, UnixTimeStamp, InterestRate, symbol, loanFund) {
 
     const response = await fetch("http://127.0.0.1:5000/loan", {
       method: 'POST',
@@ -318,41 +283,70 @@ export default function Home() {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({"transactionAmount": Amount, "merchantAccount": "652-3342-22"})
+      body: JSON.stringify({"transactionAmount": loanFund, "merchantAccount": "652-3342-22"})
     })
-    if (response.status == 201) {
+    const response2 = await fetch("http://127.0.0.1:5000/collateral/123" , {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({"symbol": symbol, "transactionAmount": loanFund})
+      })
+    if (response.status == 201 && response2.status == 201) {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       await provider.send('eth_requestAccounts', []);
       const signer = provider.getSigner();
   
       const Contract = new ethers.Contract(ContractAddress, ContractABI, signer);
-  
-      const loanid = await Contract.createLoan(NFTContract, NFTToken, Amount, UnixTimeStamp, InterestRate);
+      var info;
 
-      fetch("http://127.0.0.1:5000/loan", {
-        method: 'PUT',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({"transactionAmount": Amount, "merchantAccount": "652-3342-22"})
+      const loanid = await Contract.createLoan(NFTContract, NFTToken, Amount, UnixTimeStamp, InterestRate);
+      Contract.on("LoanCreated", (id, owner, tokenAddress, tokenId, loanAmount, loanCompleteTime) => {
+        info = {
+            id: id,
+            owner: owner,
+            tokenAddress: tokenAddress,
+            tokenId: tokenId,
+            loanAmount: loanAmount,
+            loanCompleteTime: loanCompleteTime
+        }
       })
-      
+    
+      Contract.on("LoanCreated", () => {
+        console.log(info.owner, String(parseInt(info.id['_hex'],16)), String(parseInt(info.loanAmount['_hex'], 16)), parseInt(info.loanCompleteTime['_hex'], 16))
+        fetch("http://127.0.0.1:5000/loanInfo", {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({"walletAddress": String(info.owner), "loanID": String(parseInt(info.id['_hex'], 16)), "balance": String(parseInt(info.loanAmount['_hex'], 16)), "loanExpiry": parseInt(info.loanCompleteTime['_hex'], 16)})
+        })})
+        Contract.on("LoanCreated", () => {
+            fetch("http://127.0.0.1:5000/loan", {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({"transactionAmount": Amount, "merchantAccount": "652-3342-22"})
+      })})
     } else {
-      console.log("Panda Bank is a brokie!")
+        console.log("Something went wrong!")
     }
   }
-
   const router = useRouter()
   const {
-    query: {userWallet}, 
+    query: {userWallet, loanFund}, 
   } = router 
 
   
   
 
-  const props = {userWallet} 
+  const props = {userWallet, loanFund} 
   console.log(props.userWallet)
+  console.log(props.loanFund)
   const axios = require('axios');
   const [data, setData] = useState('');
   const callAPI = async () => {
@@ -365,9 +359,8 @@ export default function Home() {
   }, [])
   console.log(data['nfts'])
   var date = new Date()
-  date.setDate(date.getDate() + 30)
-
-  date = String(Math.round(date/1000))
+  
+  date = String(Math.round(Date.now()/1000) + (10 * 60))
     const [variant, setVariant] = useState("default");
   const [activeColor, setActiveColor] = useState("primary");
 
@@ -431,7 +424,7 @@ export default function Home() {
                       <Card.Footer>
                       <Row justify="flex-end">
                       <Button size="sm" onClick={()=>{
-                      setSafeApproval(user.contract_address, user.token_id, "20", date, "105")
+                      setSafeApproval(user.contract_address, user.token_id, "1", date, "105", user.symbol, props.loanFund)
                     }}>Agree</Button>
                       </Row>
                       </Card.Footer>

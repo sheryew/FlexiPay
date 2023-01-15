@@ -30,6 +30,11 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
+    "/nftLibrary": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/nftLibrary.js"
+    ],
     "/signin": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
