@@ -294,6 +294,15 @@ export default function Home() {
         },
         body: JSON.stringify({"symbol": symbol, "transactionAmount": loanFund})
       })
+      const response3 = await fetch('http://127.0.0.1:5000/exchange', {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({"sgd": Amount})
+      }).then(res => res.json())
+      console.log(response3)
     if (response.status == 201 && response2.status == 201) {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       await provider.send('eth_requestAccounts', []);
@@ -302,7 +311,7 @@ export default function Home() {
       const Contract = new ethers.Contract(ContractAddress, ContractABI, signer);
       var info;
 
-      const loanid = await Contract.createLoan(NFTContract, NFTToken, Amount, UnixTimeStamp, InterestRate);
+      const loanid = await Contract.createLoan(NFTContract, NFTToken, String(Math.ceil(response3['ETH'] * 10) ), UnixTimeStamp, InterestRate);
       Contract.on("LoanCreated", (id, owner, tokenAddress, tokenId, loanAmount, loanCompleteTime) => {
         info = {
             id: id,
@@ -322,7 +331,7 @@ export default function Home() {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({"walletAddress": String(info.owner), "loanID": String(parseInt(info.id['_hex'], 16)), "balance": String((parseInt(info.loanAmount['_hex'], 16) * 1.05)/ 10), "loanExpiry": parseInt(info.loanCompleteTime['_hex'], 16)})
+            body: JSON.stringify({"walletAddress": String(info.owner), "loanID": String(parseInt(info.id['_hex'], 16)), "balance": String((parseInt(info.loanAmount['_hex'], 16))/ 10), "loanExpiry": parseInt(info.loanCompleteTime['_hex'], 16)})
         })})
         Contract.on("LoanCreated", () => {
             fetch("http://127.0.0.1:5000/loan", {
@@ -341,7 +350,7 @@ export default function Home() {
   const {
     query: {userWallet, loanFund, merchantAccount}, 
   } = router 
-
+  
   function sendProps() {
     Router.push({
       pathname: "/",
@@ -352,7 +361,19 @@ export default function Home() {
     })
   }
 
-  const props = {userWallet, loanFund} 
+  function merchantPage() {
+    console.log("merchant page here")
+    console.log(props.merchantAccount)
+    Router.push({
+      pathname: "/merchantPage",
+      query: {
+        userWallet: props.userWallet,
+        merchantAccount: props.merchantAccount
+      }
+    })
+  }
+
+  const props = {userWallet, loanFund, merchantAccount} 
   console.log(props.userWallet)
   console.log(props.loanFund)
   const axios = require('axios');
@@ -385,7 +406,24 @@ export default function Home() {
   ];
 
   const colors = ["primary", "secondary", "success", "warning", "error"];
+  var data2
+    
+    const callAPI2 = async () => {
+       data2 = await fetch('http://127.0.0.1:5000/exchange', {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({"sgd": props.loanFund})
+      }).then(res => res.json())
+    }
   
+    
+
+  
+  console.log(data2)
+ 
   return (
     <div>
 
@@ -400,6 +438,13 @@ export default function Home() {
           <Navbar.Link onClick={()=>{
                       sendProps()
                     }}>Home</Navbar.Link>
+          <Navbar.Link onClick={()=>{
+            merchantPage()
+          }}>Merchant</Navbar.Link>
+
+          <Navbar.Link color="inherit" href="/bankPage">
+            PandaBank
+          </Navbar.Link>
         </Navbar.Content>
         <Navbar.Content>
           <Navbar.Link color="inherit" href="/signin">
@@ -429,12 +474,23 @@ export default function Home() {
                       </Card.Header>
                       <Card.Body css={{ py: "$10" }}>
                       <img src= {"https://ipfs.io/ipfs/" + user.file_url.slice(7)} alt='me' width='200' height='200'/>
+                      <Spacer y={0.5} />
+                      <Row>
+                      <Col>
+                      <Text>Max Loan: </Text>
+                      </Col>
+                      <Col>
+                      <Text color="success">{user.value}</Text>
+                      </Col>
+                      
+
+                      </Row>
                       </Card.Body>
-                      <Card.Divider />
                       <Card.Footer>
                       <Row justify="flex-end">
                       <Button size="sm" onClick={()=>{
-                      setSafeApproval(user.contract_address, user.token_id, "1", date, "105", user.symbol, props.loanFund)
+                        console.log(props.loanFund)
+                      setSafeApproval(user.contract_address, user.token_id, props.loanFund, date, "105", user.symbol, props.loanFund)
                     }}>Agree</Button>
                       </Row>
                       </Card.Footer>
