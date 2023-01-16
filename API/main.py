@@ -54,7 +54,7 @@ accounts = {"652-3342-22": {"Account Holder": "IKEA", "Balance": 2002.87, "Trans
 approvedCollections = {"doodle": "0x8a90CAb2b38dba80c64b7734e58Ee1dB38B8992e"}
 
 loans = {"0x123":[{"loanID":0, "balance": 100, "loanExpiry": 123}],"0x456":[{"loanID":1, "balance": 200, "loanExpiry": (time.time_ns() + 999999999999999)}],"0x789":[{"loanID":2, "balance": 0,"loanExpiry": (time.time_ns() + 9999999999999999)}],"0x60137a39d798FC9824fe17115090502A0a1677e6":[{"loanID":1, "balance": 200, "loanExpiry": (time.time_ns() + 999999999999999)}]}
-
+#{"accNo": 123, "balance": 100, "account holder": ikea, "transactionHistory": [{}]}
 def convertETHtoSGD(ETH):
     response = cg.get_price(ids='ethereum', vs_currencies='sgd')
     conversionETHtoSGD =  response['ethereum']['sgd']
@@ -69,9 +69,9 @@ class Exchange(Resource):
     def post(self):
         args = exchange_post_args.parse_args()
         response = cg.get_price(ids='ethereum', vs_currencies='sgd')
-        conversionETHtoSGD =  response['ethereum']['sgd']
         transactionAmountETH = convertSGDtoETH(args['sgd'])
         return {'ETH': transactionAmountETH}, 201
+    
    
 
 class Collateral(Resource):
@@ -93,7 +93,7 @@ class Collateral(Resource):
         floorPriceSGD = convertETHtoSGD(floorPriceETH) 
         print(floorPriceSGD)
         print(args['transactionAmount'])
-        if floorPriceSGD >= args['transactionAmount']:
+        if floorPriceSGD >= args['transactionAmount'] * 2:
             return {"result": "success"}, 201
         else:
             return {"result": "failed"}, 404
@@ -115,9 +115,26 @@ class Collateral(Resource):
             url = f"https://eth-goerli.g.alchemy.com/nft/v2/TaUU5yuSMWTtAY2xs4ymwzZoBpSN_Pe4/getNFTMetadata?contractAddress={nft['contract_address']}&tokenId={nft['token_id']}&refreshCache=false"
             response = requests.get(url, headers=headers)       
             response = response.json()
+            if response['contractMetadata']['symbol'].lower() not in approvedCollections:
+                continue
             nft["file_url"] = response["media"][0]["raw"]
             nft["name"] = response["title"]
-            nft["symbol"] = response['contractMetadata']['symbol']
+            nft["symbol"] = response['contractMetadata']['symbol'].lower()
+            print(nft)
+            collectionID = approvedCollections[nft["symbol"]]
+            url = "https://api.nftport.xyz/v0/transactions/stats/" + collectionID + "?chain=ethereum"
+            
+            response = requests.get(url, headers={
+            "accept": "application/json",
+            "Authorization": "c25da947-4699-47cb-b783-43d795249e67"
+        })
+            response = response.json()
+            print(response)
+            floorPriceETH = response['statistics']['floor_price']
+            floorPriceSGD = convertETHtoSGD(floorPriceETH)
+            print(nft)
+            nft["value"] = round(floorPriceSGD * 0.5)
+        print(nftList)
         return {'nfts':nftList},201
 
 def approveLoan(transactionAmount, merchantAccount):
@@ -126,7 +143,7 @@ def approveLoan(transactionAmount, merchantAccount):
     return transactionAmount <= accounts[PANDA_BANK_ACCOUNT_NUMBER]["Balance"]
 
 def createTransaction(transactionAmount, sender, receiver):
-    date = time.time()
+    date = round(time.time())
     accounts[receiver]["TransactionHistory"].insert(0,{"Sender": sender, "Transaction Amount(SGD)": transactionAmount, "Date": date, "recipient": receiver})
     accounts[sender]["TransactionHistory"].insert(0,{"Sender": sender, "Transaction Amount(SGD)": (-transactionAmount), "Date": date, "recipient": receiver})
 
@@ -171,6 +188,9 @@ class Loan(Resource):
 def createLoanRecord(walletAddress, loanID, remainingBalance, loanExpiry):
     loanRecord = {"loanID": loanID, "balance":remainingBalance, "loanExpiry": loanExpiry}
     if walletAddress in loans:
+        for receipt in loans[walletAddress]:
+            if receipt['loanID'] == loanID:
+                return 
         loans[walletAddress].append(loanRecord)
     else:
         loans[walletAddress] = [loanRecord]
@@ -230,7 +250,9 @@ class Account(Resource):
     def get(self,accountNumber):
         if accountNumber not in accounts:
             return {"Message":"Invalid Account Number"},404
-        return {"accountNumber": accountNumber} | accounts[accountNumber], 201
+        res = {"accountNumber": accountNumber}.update(accounts[accountNumber])
+
+        return accounts[accountNumber], 201
 
 
 

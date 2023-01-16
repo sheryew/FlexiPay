@@ -313,9 +313,19 @@ var txReceipt = await provider.getTransactionReceipt(transactionHash);
       })
       
     } else {
-      console.log("Panda Bank is a brokie!")
+      console.log("Error spotted")
     }
   }
+  function sendProps2(remainingLoan) {
+    Router.push({
+      pathname: "/homepage",
+      query: {
+        userWallet: props.userWallet,
+        loanFund: remainingLoan
+      }
+    })
+  }
+
 
   async function repayLoan(loanID, amountInEth) {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -339,9 +349,15 @@ var txReceipt = await provider.getTransactionReceipt(transactionHash);
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ "loanID": String(parseInt(info.id['_hex'], 16)), "balance": String((parseInt(info.remainingBalance['_hex'], 16) * 1.05)/ Math.pow(10, 18))})
+        body: JSON.stringify({ "loanID": String(parseInt(info.id['_hex'], 16)), "balance": String((parseInt(info.remainingBalance['_hex'], 16))/ Math.pow(10, 18))})
       })
+      
+      
     })
+    Contract.on("LoanRepayed", () =>  {
+      sendProps2(String((parseInt(info.remainingBalance['_hex'], 16))/ Math.pow(10, 18)))}
+      )
+
   }
 
   function getvalue() {
@@ -370,6 +386,7 @@ var txReceipt = await provider.getTransactionReceipt(transactionHash);
       body: JSON.stringify({"walletAddress": props.userWallet})
     }).then(res => res.json())
     setData(data);
+    console.log(data['loans'])
   }
 
   useEffect(() =>{
@@ -380,16 +397,7 @@ var txReceipt = await provider.getTransactionReceipt(transactionHash);
   date.setDate(date.getDate() + 30)
 
 
-  function sendProps2() {
-    Router.push({
-      pathname: "/",
-      query: {
-        userWallet: props.userWallet,
-        loanFund: 1000
-      }
-    })
-  }
-
+  
   const { push } = useRouter();
 
   date = String(Math.round(date/1000))
@@ -411,10 +419,19 @@ var txReceipt = await provider.getTransactionReceipt(transactionHash);
 
 const colors = ["primary", "secondary", "success", "warning", "error"];
   const { value, reset, bindings } = useInput("");
-  const [qrData, setQrData] = useState('No result');
+  const [qrData, setQrData] = useState('');
   console.log('wallet address display')
   console.log(userWallet)
+  var date = new Date(parseInt(1673875978) * 1000)
+  console.log(date)
   
+  function unixToDate(seq){
+    var date = new Date(parseInt(seq) * 1000)
+    date = String(date)
+    return date.split(' ').slice(0, 5).join(' ')
+    
+  }
+
   return (
     <div>
 
@@ -452,9 +469,9 @@ const colors = ["primary", "secondary", "success", "warning", "error"];
                 </div>
             ))} */}
     <Container gap={0}>
-    <Row>
+    <Row gap={3}>
     <Col>
-    <Card css={{ mw: "550px"}}>
+    <Card css={{ mw: "690px"}}>
           <Card.Header>
             <Text b>Pay Loans</Text>
           </Card.Header>
@@ -470,13 +487,15 @@ const colors = ["primary", "secondary", "success", "warning", "error"];
       <Table.Header>
         <Table.Column>Loan ID</Table.Column>
         <Table.Column>Loan Amount</Table.Column>
+        <Table.Column>Expiry</Table.Column>
         <Table.Column>Action</Table.Column>
       </Table.Header>
       <Table.Body>
       {data["loans"]?.map(user => (
                 <Table.Row key="1">
                     <Table.Cell>{user.loanID}</Table.Cell>
-                    <Table.Cell>{user.balance}</Table.Cell>
+                    <Table.Cell>{user.balance.slice(0, 5)}</Table.Cell>
+                    <Table.Cell>{unixToDate(user.loanExpiry)}</Table.Cell>
                     <Table.Cell> 
                     <Tooltip content={"Enter amount you wish to pay"} rounded color="primary">
                       <Input 
@@ -508,15 +527,15 @@ const colors = ["primary", "secondary", "success", "warning", "error"];
           </Card.Body>
           <Card.Footer>
             <Row justify="flex-end">
-              <Button size="sm" as={Link}  onClick={()=>{
-                      sendProps2()
-                    }}>Refresh</Button>
+              {/* <Button size="sm" as={Link}  onClick={()=>{
+                      
+                    }}>Refresh</Button> */}
             </Row>
           </Card.Footer>
         </Card>
         </Col>
       <Col>
-    <Card css={{ mw: "550px"}}>
+    <Card css={{ mw: "450px"}}>
           <Card.Header>
             <Text b>Initiate Loan</Text>
           </Card.Header>
@@ -530,12 +549,45 @@ const colors = ["primary", "secondary", "success", "warning", "error"];
 
 
               if (!!error) {
-                        console.info(error);
+                        // console.info(error);
                     }
                 }}
                 style={{ width: '100%' }}
           />
-          <p>{qrData}</p> *
+          <Row>
+            <Col>
+          <Text
+        h1
+        size={30}
+        css={{
+          textGradient: "45deg, $purple600 -20%, $pink600 100%",
+        }}
+        weight="bold"
+      >
+        Merchant ID:
+      </Text> </Col>
+        <Col>
+          <Text color="Primary" size={25}>{qrData.split(' ')[0]}</Text>
+        </Col>
+          </Row>
+          
+          <Row>
+            <Col>
+            <Text
+        h1
+        size={30}
+        css={{
+          textGradient: "45deg, $purple600 -20%, $pink600 100%",
+        }}
+        weight="bold"
+      >
+        Amount:
+      </Text>
+            </Col>
+            <Col>
+            <Text color="Primary" size={25}>{qrData.split(' ')[1]}</Text>
+            </Col>
+          </Row>
           </Card.Body>
           <Card.Divider />
           <Card.Footer>
