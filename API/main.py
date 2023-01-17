@@ -1,10 +1,13 @@
+COINGECKO_APIKEY = 'API KEY HERE'
+NFTPORT_APIKEY = 'API KEY HERE'
+ALCHEMY_APIKEY = 'API KEY HERE'
 from flask import Flask, request
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
 import requests
 from flask_cors import CORS
 from pycoingecko import CoinGeckoAPI
 import time
-cg = CoinGeckoAPI(api_key='CG-UoUVUe9cGfc7tWvJaUp5RcAJ')
+cg = CoinGeckoAPI(api_key=COINGECKO_APIKEY)
 
 app = Flask(__name__)
 api = Api(app)
@@ -79,7 +82,7 @@ class Collateral(Resource):
     def post(self, walletAddress):
         headers = {
             "accept": "application/json",
-            "Authorization": "c25da947-4699-47cb-b783-43d795249e67"
+            "Authorization": NFTPORT_APIKEY
         }
         args = collateral_post_args.parse_args()
         symbol = args['symbol'].lower()
@@ -101,7 +104,7 @@ class Collateral(Resource):
     def get(self, walletAddress):
         headers = {
             "accept": "application/json",
-            "Authorization": "c25da947-4699-47cb-b783-43d795249e67"
+            "Authorization": NFTPORT_APIKEY
         }
         # args = collateral_get_args.parse_args()
         url = "https://api.nftport.xyz/v0/accounts/" + walletAddress + "?chain=goerli&page_size=50&include=metadata"
@@ -112,7 +115,7 @@ class Collateral(Resource):
             nftList.append({"token_id": nft['token_id'], "contract_address": nft['contract_address']})
             headers = {"accept": "application/json"}
         for nft in nftList:
-            url = f"https://eth-goerli.g.alchemy.com/nft/v2/TaUU5yuSMWTtAY2xs4ymwzZoBpSN_Pe4/getNFTMetadata?contractAddress={nft['contract_address']}&tokenId={nft['token_id']}&refreshCache=false"
+            url = f"https://eth-goerli.g.alchemy.com/nft/v2/{ALCHEMY_APIKEY}/getNFTMetadata?contractAddress={nft['contract_address']}&tokenId={nft['token_id']}&refreshCache=false"
             response = requests.get(url, headers=headers)       
             response = response.json()
             if response['contractMetadata']['symbol'].lower() not in approvedCollections:
@@ -126,7 +129,7 @@ class Collateral(Resource):
             
             response = requests.get(url, headers={
             "accept": "application/json",
-            "Authorization": "c25da947-4699-47cb-b783-43d795249e67"
+            "Authorization": NFTPORT_APIKEY
         })
             response = response.json()
             print(response)

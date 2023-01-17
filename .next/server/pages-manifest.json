@@ -2,7 +2,8 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
+  "/nftLibrary": "pages/nftLibrary.js",
+  "/": "pages/index.js",
   "/signin": "pages/signin.js",
-  "/homepage": "pages/homepage.js",
   "/api/auth/[...nextauth]": "pages/api/auth/[...nextauth].js"
 }
