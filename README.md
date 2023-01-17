@@ -1,5 +1,10 @@
 # Execution Instructions
 
+- To first build the website, execute the following instructions from the main folder in the terminal:
+```
+npm rebuild
+```
+
 - To launch the website, execute the following instructions from the main folder in the terminal:
 ```
 npm run dev
