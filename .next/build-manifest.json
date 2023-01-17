@@ -30,15 +30,15 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
+    "/homepage": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/homepage.js"
+    ],
     "/nftLibrary": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/nftLibrary.js"
-    ],
-    "/signin": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/signin.js"
     ]
   },
   "ampFirstPages": []

@@ -1,12 +1,16 @@
-COINGECKO_APIKEY = 'API KEY HERE'
-NFTPORT_APIKEY = 'API KEY HERE'
-ALCHEMY_APIKEY = 'API KEY HERE'
 from flask import Flask, request
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
 import requests
 from flask_cors import CORS
 from pycoingecko import CoinGeckoAPI
 import time
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+COINGECKO_APIKEY = os.getenv('COINGECKO_APIKEY')
+NFTPORT_APIKEY = os.getenv('NFTPORT_APIKEY')
+ALCHEMY_APIKEY = os.getenv('ALCHEMY_APIKEY')
 cg = CoinGeckoAPI(api_key=COINGECKO_APIKEY)
 
 app = Flask(__name__)
@@ -94,8 +98,6 @@ class Collateral(Resource):
         response = response.json()
         floorPriceETH = response['statistics']['floor_price']
         floorPriceSGD = convertETHtoSGD(floorPriceETH) 
-        print(floorPriceSGD)
-        print(args['transactionAmount'])
         if floorPriceSGD >= args['transactionAmount'] * 2:
             return {"result": "success"}, 201
         else:
@@ -123,7 +125,6 @@ class Collateral(Resource):
             nft["file_url"] = response["media"][0]["raw"]
             nft["name"] = response["title"]
             nft["symbol"] = response['contractMetadata']['symbol'].lower()
-            print(nft)
             collectionID = approvedCollections[nft["symbol"]]
             url = "https://api.nftport.xyz/v0/transactions/stats/" + collectionID + "?chain=ethereum"
             
@@ -132,12 +133,9 @@ class Collateral(Resource):
             "Authorization": NFTPORT_APIKEY
         })
             response = response.json()
-            print(response)
             floorPriceETH = response['statistics']['floor_price']
             floorPriceSGD = convertETHtoSGD(floorPriceETH)
-            print(nft)
             nft["value"] = round(floorPriceSGD * 0.5)
-        print(nftList)
         return {'nfts':nftList},201
 
 def approveLoan(transactionAmount, merchantAccount):
@@ -180,11 +178,7 @@ class Loan(Resource):
         try:
             if not approveLoan(transactionAmount, merchantAccount):
                 return {"Message": "Loan was not approved"},422
-            print("before:", accounts[PANDA_BANK_ACCOUNT_NUMBER])
-            print("before:",accounts[merchantAccount])
             loanTransfer(transactionAmount,merchantAccount)
-            print("after", accounts[PANDA_BANK_ACCOUNT_NUMBER])
-            print("after",accounts[merchantAccount])
             return {"Message": "Loan Amount has been transferred"}, 201
         except:
             return {"Message": "Invalid Account Number"},404
@@ -210,7 +204,6 @@ def updateLoanRecords():
     for wallet, loanRecords in loans.items():   
         for i in range(len(loanRecords) -1, -1, -1):
             if float(loanRecords[i]['balance']) <= 0 or loanRecords[i]["loanExpiry"] <= round(time.time()):
-                print(loanRecords[i]['balance'], loanRecords[i]["loanExpiry"], round(time.time()))
                 del loanRecords[i]
             
 
@@ -219,27 +212,22 @@ def updateLoanRecords():
 class LoanInfo(Resource):
     def post(self):
         result = {}
-        print("correct")
-        print(loans)
         args = LoanInfo_post_args.parse_args()
         walletAddress = args["walletAddress"]
         if walletAddress not in loans.keys():
             return {"loans": []},403
         updateLoanRecords()
-        print(loans)
         return {"loans": loans[walletAddress]},201
         
 
 
     def put(self):
         args = LoanInfo_put_args.parse_args()
-        print("hi")
         walletAddress = args["walletAddress"]
         loanID = args["loanID"]
         balance = args["balance"]
         loanExpiry = args["loanExpiry"]
         createLoanRecord(walletAddress,loanID,balance,loanExpiry)
-        print(loans)
         return {}, 201
 
     def patch(self):
@@ -278,7 +266,6 @@ def generateMerchantQR(merchantAccountNumber, transactionAmount, merchantName):
 class QR(Resource):
     def get(self):
         args = QrInformation_get_args.parse_args()
-        print(request.form)
 
     def put(self):
         pass
